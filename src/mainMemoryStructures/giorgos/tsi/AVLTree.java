@@ -1,313 +1,177 @@
 package mainMemoryStructures.giorgos.tsi;
 
-//AVL Binary search tree implementation in Java
-//Author: AlgorithmTutor
-
+/**
+ * Implementation made by eugenp
+ * https://github.com/eugenp/tutorials/blob/master/data-structures/src/main/java/com/baeldung/avltree/AVLTree.java?fbclid=IwAR2yD4DWlPeEOspfkGEyw-sggUIreK8wIzYAGP-iG0C1eLob5zGhhAG_Yc4
+ * A print method was implemented by me to test the functionality.
+ *  */
 public class AVLTree {
-	
-	private AVLNode root; // root of the tree
 
-	/*Constructor: */
-	public AVLTree() {
-		root = null;
-	}
+    public class Node {
+        int key;
+        int height;
+        Node left;
+        Node right;
 
-	private void printHelper(AVLNode currPtr, String indent, boolean last) {
-		// print the tree structure on the screen
-	   	if (currPtr != null) {
-		   System.out.print(indent);
-		   if (last) {
-		      System.out.print("R----");
-		      indent += "     ";
-		   } else {
-		      System.out.print("L----");
-		      indent += "|    ";
-		   }
+        Node(int key) {
+            this.key = key;
+        }
+    }
 
-		   System.out.println(currPtr.data + "(BF = " + currPtr.bf + ")");
+    private Node root;
 
-		   printHelper(currPtr.left, indent, false);
-		   printHelper(currPtr.right, indent, true);
-		}
-	}
+    public Node find(int key) {
+        Node current = root;
+        while (current != null) {
+            if (current.key == key) {
+               break;
+            }
+            current = current.key < key ? current.right : current.left;
+        }
+        return current;
+    }
+    
+    public void printTree() {
+    	this.printHelp(root, 0);
+    }
+    /**
+     * Method made by me , used to print the bst on 'inorder' traversal.
+     * Uses recursion.
+     * @param root of the tree/subtree and the number of spaces
+     *             to print on the line in which the element will
+     *             be printed.
+     * */
+    private void printHelp(Node root,int spaces){
 
-	private AVLNode searchTreeHelper(AVLNode node, int key) {
-		if (node == null || key == node.data) {
-			return node;
-		}
+        if(root == null)
+            return;
 
-		if (key < node.data) {
-			return searchTreeHelper(node.left, key);
-		} 
-		return searchTreeHelper(node.right, key);
-	}
+        /*Print Right subtree */
+        printHelp(root.right,spaces + 10);
 
-	private AVLNode deleteNodeHelper(AVLNode node, int key) {
-		// search the key
-		if (node == null) return node;
-		else if (key < node.data) node.left = deleteNodeHelper(node.left, key);
-		else if (key > node.data) node.right = deleteNodeHelper(node.right, key);
-		else {
-			// the key has been found, now delete it
+        /*print the root node */
+        System.out.print("\n");
+        for(int i=0; i<spaces; i++)
+            System.out.print(" ");
 
-			// case 1: node is a leaf node
-			if (node.left == null && node.right == null) {
-				node = null;
-			}
+        System.out.print(root.key);
+        System.out.print("\n");
 
-			// case 2: node has only one child
-			else if (node.left == null) {
-				AVLNode temp = node;
-				node = node.right;
-			}
+        /*Print Left subtree */
+        printHelp(root.left,spaces + 10);
 
-			else if (node.right == null) {
-				AVLNode temp = node;
-				node = node.left;
-			}
+    }
 
-			// case 3: has both children
-			else {
-				AVLNode temp = minimum(node.right);
-				node.data = temp.data;
-				node.right = deleteNodeHelper(node.right, temp.data);
-			}
+    public void insert(int key) {
+        root = insert(root, key);
+    }
 
-		} 
+    public void delete(int key) {
+        root = delete(root, key);
+    }
 
-		// Write the update balance logic here 
-		// YOUR CODE HERE
+    public Node getRoot() {
+        return root;
+    }
 
-		return node;
-	}
+    public int height() {
+        return root == null ? -1 : root.height;
+    }
 
-	// update the balance factor the node
-	private void updateBalance(AVLNode node) {
-		if (node.bf < -1 || node.bf > 1) {
-			rebalance(node);
-			return;
-		}
+    private Node insert(Node node, int key) {
+        if (node == null) {
+            return new Node(key);
+        } else if (node.key > key) {
+            node.left = insert(node.left, key);
+        } else if (node.key < key) {
+            node.right = insert(node.right, key);
+        } else {
+            throw new RuntimeException("duplicate Key!");
+        }
+        return rebalance(node);
+    }
 
-		if (node.parent != null) {
-			if (node == node.parent.left) {
-				node.parent.bf -= 1;
-			} 
+    private Node delete(Node node, int key) {
+        if (node == null) {
+            return node;
+        } else if (node.key > key) {
+            node.left = delete(node.left, key);
+        } else if (node.key < key) {
+            node.right = delete(node.right, key);
+        } else {
+            if (node.left == null || node.right == null) {
+                node = (node.left == null) ? node.right : node.left;
+            } else {
+                Node mostLeftChild = mostLeftChild(node.right);
+                node.key = mostLeftChild.key;
+                node.right = delete(node.right, node.key);
+            }
+        }
+        if (node != null) {
+            node = rebalance(node);
+        }
+        return node;
+    }
 
-			if (node == node.parent.right) {
-				node.parent.bf += 1;
-			}
+    private Node mostLeftChild(Node node) {
+        Node current = node;
+        /* loop down to find the leftmost leaf */
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
+    }
 
-			if (node.parent.bf != 0) {
-				updateBalance(node.parent);
-			}
-		}
-	}
+    private Node rebalance(Node z) {
+        updateHeight(z);
+        int balance = getBalance(z);
+        if (balance > 1) {
+            if (height(z.right.right) > height(z.right.left)) {
+                z = rotateLeft(z);
+            } else {
+                z.right = rotateRight(z.right);
+                z = rotateLeft(z);
+            }
+        } else if (balance < -1) {
+            if (height(z.left.left) > height(z.left.right)) {
+                z = rotateRight(z);
+            } else {
+                z.left = rotateLeft(z.left);
+                z = rotateRight(z);
+            }
+        }
+        return z;
+    }
 
-	// rebalance the tree
-	void rebalance(AVLNode node) {
-		if (node.bf > 0) {
-			if (node.right.bf < 0) {
-				rightRotate(node.right);
-				leftRotate(node);
-			} else {
-				leftRotate(node);
-			}
-		} else if (node.bf < 0) {
-			if (node.left.bf > 0) {
-				leftRotate(node.left);
-				rightRotate(node);
-			} else {
-				rightRotate(node);
-			}
-		}
-	}
+    private Node rotateRight(Node y) {
+        Node x = y.left;
+        Node z = x.right;
+        x.right = y;
+        y.left = z;
+        updateHeight(y);
+        updateHeight(x);
+        return x;
+    }
 
+    private Node rotateLeft(Node y) {
+        Node x = y.right;
+        Node z = x.left;
+        x.left = y;
+        y.right = z;
+        updateHeight(y);
+        updateHeight(x);
+        return x;
+    }
 
-	private void preOrderHelper(AVLNode node) {
-		if (node != null) {
-			System.out.print(node.data + " ");
-			preOrderHelper(node.left);
-			preOrderHelper(node.right);
-		} 
-	}
+    private void updateHeight(Node n) {
+        n.height = 1 + Math.max(height(n.left), height(n.right));
+    }
 
-	private void inOrderHelper(AVLNode node) {
-		if (node != null) {
-			inOrderHelper(node.left);
-			System.out.print(node.data + " ");
-			inOrderHelper(node.right);
-		} 
-	}
+    private int height(Node n) {
+        return n == null ? -1 : n.height;
+    }
 
-	private void postOrderHelper(AVLNode node) {
-		if (node != null) {
-			postOrderHelper(node.left);
-			postOrderHelper(node.right);
-			System.out.print(node.data + " ");
-		} 
-	}
-
-	// Pre-Order traversal
-	// Node.Left Subtree.Right Subtree
-	public void preorder() {
-		preOrderHelper(this.root);
-	}
-
-	// In-Order traversal
-	// Left Subtree . Node . Right Subtree
-	public void inorder() {
-		inOrderHelper(this.root);
-	}
-
-	// Post-Order traversal
-	// Left Subtree . Right Subtree . Node
-	public void postorder() {
-		postOrderHelper(this.root);
-	}
-
-	// search the tree for the key k
-	// and return the corresponding node
-	public AVLNode searchTree(int k) {
-		return searchTreeHelper(this.root, k);
-	}
-
-	// find the node with the minimum key
-	public AVLNode minimum(AVLNode node) {
-		while (node.left != null) {
-			node = node.left;
-		}
-		return node;
-	}
-
-	// find the node with the maximum key
-	public AVLNode maximum(AVLNode node) {
-		while (node.right != null) {
-			node = node.right;
-		}
-		return node;
-	}
-
-	// find the successor of a given node
-	public AVLNode successor(AVLNode x) {
-		// if the right subtree is not null,
-		// the successor is the leftmost node in the
-		// right subtree
-		if (x.right != null) {
-			return minimum(x.right);
-		}
-
-		// else it is the lowest ancestor of x whose
-		// left child is also an ancestor of x.
-		AVLNode y = x.parent;
-		while (y != null && x == y.right) {
-			x = y;
-			y = y.parent;
-		}
-		return y;
-	}
-
-	// find the predecessor of a given node
-	public AVLNode predecessor(AVLNode x) {
-		// if the left subtree is not null,
-		// the predecessor is the rightmost node in the 
-		// left subtree
-		if (x.left != null) {
-			return maximum(x.left);
-		}
-
-		AVLNode y = x.parent;
-		while (y != null && x == y.left) {
-			x = y;
-			y = y.parent;
-		}
-
-		return y;
-	}
-
-	// rotate left at node x
-	void leftRotate(AVLNode x) {
-		AVLNode y = x.right;
-		x.right = y.left;
-		if (y.left != null) {
-			y.left.parent = x;
-		}
-		y.parent = x.parent;
-		if (x.parent == null) {
-			this.root = y;
-		} else if (x == x.parent.left) {
-			x.parent.left = y;
-		} else {
-			x.parent.right = y;
-		}
-		y.left = x;
-		x.parent = y;
-
-		// update the balance factor
-		x.bf = x.bf - 1 - Math.max(0, y.bf);
-		y.bf = y.bf - 1 + Math.min(0, x.bf);
-	}
-
-	// rotate right at node x
-	void rightRotate(AVLNode x) {
-		AVLNode y = x.left;
-		x.left = y.right;
-		if (y.right != null) {
-			y.right.parent = x;
-		}
-		y.parent = x.parent;
-		if (x.parent == null) {
-			this.root = y;
-		} else if (x == x.parent.right) {
-			x.parent.right = y;
-		} else {
-			x.parent.left = y;
-		}
-		y.right = x;
-		x.parent = y;
-
-		// update the balance factor
-		x.bf = x.bf + 1 - Math.min(0, y.bf);
-		y.bf = y.bf + 1 + Math.max(0, x.bf);
-	}
-
-
-	// insert the key to the tree in its appropriate position
-	public void insert(int key) {
-		// PART 1: Ordinary BST insert
-		AVLNode node = new AVLNode(key);
-		AVLNode y = null;
-		AVLNode x = this.root;
-
-		while (x != null) {
-			y = x;
-			if (node.data < x.data) {
-				x = x.left;
-			} else {
-				x = x.right;
-			}
-		}
-
-		// y is parent of x
-		node.parent = y;
-		if (y == null) {
-			root = node;
-		} else if (node.data < y.data) {
-			y.left = node;
-		} else {
-			y.right = node;
-		}
-
-		// PART 2: re-balance the node if necessary
-		updateBalance(node);
-	}
-
-	// delete the node from the tree
-	AVLNode deleteNode(int data) {
-		return deleteNodeHelper(this.root, data);
-	}
-
-	// print the tree structure on the screen
-	public void prettyPrint() {
-		printHelper(this.root, "", true);
-	}
+    public int getBalance(Node n) {
+        return (n == null) ? 0 : height(n.right) - height(n.left);
+    }
 }
