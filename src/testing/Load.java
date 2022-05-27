@@ -134,7 +134,7 @@ public class Load {
 	 * @return int array with the 100 elements to insert.
 	 * @throws IOException
 	 *  */
-	public static int[] OneHundredElementsToInsert() throws IOException {
+	public static int[] oneHundredElementsToInsert() throws IOException {
 		
 		/*Open the stream with the keys to insert file: */
 		raf = new RandomAccessFile("keys_search_100_BE.bin", "r");
