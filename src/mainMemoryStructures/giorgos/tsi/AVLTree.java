@@ -105,7 +105,7 @@ public class AVLTree {
             MultiCounter.increaseCounter(2);//one assignment made.
         }
         else {
-        	return null;//do not add duplicates.
+        	throw new RuntimeException("Duplicate keys are not allowed!");
         }
         return rebalance(node);
     }
