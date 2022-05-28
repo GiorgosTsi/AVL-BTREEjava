@@ -157,6 +157,32 @@ public class Tester {
 			
 			/*** Start tests ***/
 			
+			/********** 1) Insert 100 extra elements: **********/
+			
+			//insert 100 extra elements:
+			for(int i=0; i < 100 ; i++) {
+				
+				MultiCounter.resetCounter(2);//reset the counter.
+				bTree.insert(this.oneHundredElementsToInsert[i]);
+				totalOperationsDone += MultiCounter.getCount(2);//operations for inserting a key,stored in counter 2.
+				
+			}
+			System.out.println("\t\t Mean operations for inserting 100 elements in b tree with " + numberOfElements + " elements: " + totalOperationsDone/100);
+			
+			/********** 2) Delete 100 elements: **********/
+			
+			totalOperationsDone = 0.0;//reset the variable,so we test the deletions.
+			
+			//delete 100 elements:
+			for(int i=0; i < 100 ; i++) {
+			
+				MultiCounter.resetCounter(2);//reset the counter.
+				bTree.remove(this.elementsToDelete[i]);
+				totalOperationsDone += MultiCounter.getCount(2);//operations for deleting a key,stored in counter 2.
+				
+			}
+			System.out.println("\t\t Mean operations for deleting 100 elements in b tree with " + numberOfElements + " elements: " + totalOperationsDone/100);
+			
 			
 			
 			/********** 3) Search 100 elements: **********/

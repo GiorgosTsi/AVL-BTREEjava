@@ -35,10 +35,14 @@ public class BTreeNode {
     public int findKey(int key){
 
         int idx = 0;
+        MultiCounter.increaseCounter(2); // one assignment made.
         // The conditions for exiting the loop are: 1.idx == num, i.e. scan all of them once
         // 2. IDX < num, i.e. key found or greater than key
-        while (idx < num && keys[idx] < key)
+        while (MultiCounter.increaseCounter(2) && idx < num && 
+        		MultiCounter.increaseCounter(2) && keys[idx] < key) {
             ++idx;
+            MultiCounter.increaseCounter(2);// 1 assignment for ++idx; 
+        }
         return idx;
     }
 
@@ -46,15 +50,16 @@ public class BTreeNode {
     public void remove(int key){
 
         int idx = findKey(key);//find the index of the key or the 1st greater key. 
-        if (idx < num && keys[idx] == key){ // key found on the current node.
-            if (isLeaf) // key in leaf node!
+        if (MultiCounter.increaseCounter(2) && idx < num && 
+        		MultiCounter.increaseCounter(2) && keys[idx] == key){ // key found on the current node.
+            if (MultiCounter.increaseCounter(2) && isLeaf) // key in leaf node!
                 removeFromLeaf(idx);
             else // key is not in the leaf node
                 removeFromNonLeaf(idx);
         }
         else{//key does not exist in the current node.Either exists in the idx's child or does not exist.
-            if (isLeaf){ // If the node is a leaf node, then the key does not exist in the B tree
-                System.out.printf("The key %d is does not exist in the tree\n",key);
+            if (MultiCounter.increaseCounter(2) && isLeaf){ // If the node is a leaf node, then the key does not exist in the B tree
+                //System.out.printf("The key %d is does not exist in the tree\n",key);
                 return;
             }
 
@@ -63,14 +68,15 @@ public class BTreeNode {
             // This flag indicates whether the key exists in the subtree whose root is the last child of the node
             // When idx is equal to num, the whole node is compared, and flag is true
             boolean flag = idx == num; 
+            MultiCounter.increaseCounter(2); // one assignment on the flag.
             
-            if (children[idx].num < MinDeg) // When the child node of the node is not full, fill it first
+            if (MultiCounter.increaseCounter(2) && children[idx].num < MinDeg) // When the child node of the node is not full, fill it first
                 fill(idx);
 
 
             //If the last child node has been merged, it must have been merged with the previous child node, so we recurse on the (idx-1) child node.
             // Otherwise, we recurse to the (idx) child node, which now has at least the keys of the minimum degree
-            if (flag && idx > num)
+            if (MultiCounter.increaseCounter(2) && flag && idx > num)
                 children[idx-1].remove(key);
             else
                 children[idx].remove(key);
@@ -80,30 +86,35 @@ public class BTreeNode {
     public void removeFromLeaf(int idx){
 
         // Shift from idx
-        for (int i = idx +1;i < num;++i)
+        for (int i = idx +1;MultiCounter.increaseCounter(2) && i < num;++i) {
             keys[i-1] = keys[i];
+            MultiCounter.increaseCounter(2,2); // 1 assignment for i++, and one more for the other.
+        }
         num --;
+        MultiCounter.increaseCounter(2);
     }
 
     public void removeFromNonLeaf(int idx){
 
         int key = keys[idx];
-
+        MultiCounter.increaseCounter(2);
         // If the subtree before key (children[idx]) has at least t keys
         // Then find the precursor 'pred' of key in the subtree with children[idx] as the root
         // Replace key with 'pred', recursively delete pred in children[idx]
-        if (children[idx].num >= MinDeg){
+        if (MultiCounter.increaseCounter(2) && children[idx].num >= MinDeg){
             int pred = getPred(idx);
             keys[idx] = pred;
             children[idx].remove(pred);
+            MultiCounter.increaseCounter(2,2);//2 assignments.
         }
         // If children[idx] has fewer keys than MinDeg, check children[idx+1]
         // If children[idx+1] has at least MinDeg keys, in the subtree whose root is children[idx+1]
         // Find the key's successor 'succ' and recursively delete succ in children[idx+1]
-        else if (children[idx+1].num >= MinDeg){
+        else if (MultiCounter.increaseCounter(2) && children[idx+1].num >= MinDeg){
             int succ = getSucc(idx);
             keys[idx] = succ;
             children[idx+1].remove(succ);
+            MultiCounter.increaseCounter(2,2); // 2 assignments.
         }
         else{
             // If the number of keys of children[idx] and children[idx+1] is less than MinDeg
@@ -119,8 +130,12 @@ public class BTreeNode {
 
         // Move to the rightmost node until you reach the leaf node
         BTreeNode cur = children[idx];
-        while (!cur.isLeaf)
+        MultiCounter.increaseCounter(2);
+        
+        while ( MultiCounter.increaseCounter(2) && !cur.isLeaf) {
             cur = cur.children[cur.num];
+            MultiCounter.increaseCounter(2);
+        }
         return cur.keys[cur.num-1];
     }
 
@@ -128,8 +143,12 @@ public class BTreeNode {
 
         // Continue to move the leftmost node from children[idx+1] until it reaches the leaf node
         BTreeNode cur = children[idx+1];
-        while (!cur.isLeaf)
+        MultiCounter.increaseCounter(2);
+        
+        while ( MultiCounter.increaseCounter(2) &&!cur.isLeaf) {
             cur = cur.children[0];
+            MultiCounter.increaseCounter(2);
+        }
         return cur.keys[0];
     }
 
@@ -137,16 +156,18 @@ public class BTreeNode {
     public void fill(int idx){
 
         // If the previous child node has multiple MinDeg-1 keys, borrow from them
-        if (idx != 0 && children[idx-1].num >= MinDeg)
+        if (MultiCounter.increaseCounter(2) && idx != 0 && 
+        		MultiCounter.increaseCounter(2) && children[idx-1].num >= MinDeg)
             borrowFromPrev(idx);
         // The latter sub node has multiple MinDeg-1 keys, from which to borrow
-        else if (idx != num && children[idx+1].num >= MinDeg)
+        else if (MultiCounter.increaseCounter(2) && idx != num && 
+        		MultiCounter.increaseCounter(2) && children[idx+1].num >= MinDeg)
             borrowFromNext(idx);
         else{
             // Merge children[idx] and its brothers
             // If children[idx] is the last child node
             // Then merge it with the previous child node or merge it with its next sibling
-            if (idx != num)
+            if (MultiCounter.increaseCounter(2) && idx != num)
                 merge(idx);
             else
                 merge(idx-1);
@@ -159,26 +180,35 @@ public class BTreeNode {
         BTreeNode child = children[idx];
         BTreeNode sibling = children[idx-1];
 
+        MultiCounter.increaseCounter(2,2); // 2 assignments made.
         // The last key from children[idx-1] overflows to the parent node
         // The key[idx-1] underflow from the parent node is inserted as the first key in children[idx]
         // Therefore, sibling decreases by one and children increases by one
-        for (int i = child.num-1; i >= 0; --i) // children[idx] move forward
+        for (int i = child.num-1; MultiCounter.increaseCounter(2) &&  i >= 0; --i) {// children[idx] move forward
             child.keys[i+1] = child.keys[i];
+            MultiCounter.increaseCounter(2,2); // 2 assignments made.1 for --i and one for the other.
+        }
 
-        if (!child.isLeaf){ // Move children[idx] forward when they are not leaf nodes
-            for (int i = child.num; i >= 0; --i)
+        if ( MultiCounter.increaseCounter(2) && !child.isLeaf){ // Move children[idx] forward when they are not leaf nodes
+            for (int i = child.num; MultiCounter.increaseCounter(2) && i >= 0; --i) {
                 child.children[i+1] = child.children[i];
+                MultiCounter.increaseCounter(2,2); // 2 assignments made.1 for --i and one for the other.
+            }
         }
 
         // Set the first key of the child node to the keys of the current node [idx-1]
         child.keys[0] = keys[idx-1];
-        if (!child.isLeaf) // Take the last child of sibling as the first child of children[idx]
+        MultiCounter.increaseCounter(2); // 1 assignment.
+        if (MultiCounter.increaseCounter(2) && !child.isLeaf) {// Take the last child of sibling as the first child of children[idx]
             child.children[0] = sibling.children[sibling.num];
+            MultiCounter.increaseCounter(2);
+        }
 
         // Move the last key of sibling up to the last key of the current node
         keys[idx-1] = sibling.keys[sibling.num-1];
         child.num += 1;
         sibling.num -= 1;
+        MultiCounter.increaseCounter(2,3); // 3 assignments made. 
     }
 
     // Symmetric with borowfromprev
@@ -189,75 +219,102 @@ public class BTreeNode {
 
         child.keys[child.num] = keys[idx];
 
-        if (!child.isLeaf)
+        MultiCounter.increaseCounter(2,3); // 3 assignments made.
+        if ( MultiCounter.increaseCounter(2) &&  !child.isLeaf) {
             child.children[child.num+1] = sibling.children[0];
+            MultiCounter.increaseCounter(2);
+        }
 
         keys[idx] = sibling.keys[0];
-
-        for (int i = 1; i < sibling.num; ++i)
+        MultiCounter.increaseCounter(2);
+        
+        for (int i = 1;  MultiCounter.increaseCounter(2) &&  i < sibling.num; ++i) {
             sibling.keys[i-1] = sibling.keys[i];
+            MultiCounter.increaseCounter(2,2);// 2 assignments made.1 for ++i and one for the other.
+        }
 
-        if (!sibling.isLeaf){
-            for (int i= 1; i <= sibling.num;++i)
+        if ( MultiCounter.increaseCounter(2) && !sibling.isLeaf){
+            for (int i= 1; MultiCounter.increaseCounter(2) &&  i <= sibling.num;++i) {
                 sibling.children[i-1] = sibling.children[i];
+                MultiCounter.increaseCounter(2,2);// 2 assignments made.1 for ++i and one for the other.
+            }
         }
         child.num += 1;
         sibling.num -= 1;
+        MultiCounter.increaseCounter(2,2);// 2 assignments made.
     }
 
     // Merge childre[idx+1] into childre[idx]
     public void merge(int idx){
 
         BTreeNode child = children[idx];
-        BTreeNode sibling = children[idx+1];
-
+        BTreeNode sibling = children[idx+1]; 
         // Insert the last key of the current node into the MinDeg-1 position of the child node
         child.keys[MinDeg-1] = keys[idx];
 
+        MultiCounter.increaseCounter(2,3); // 3 assignments made.
         // keys: children[idx+1] copy to children[idx]
-        for (int i =0 ; i< sibling.num; ++i)
+        for (int i =0 ; MultiCounter.increaseCounter(2) && i< sibling.num; ++i) {
             child.keys[i+MinDeg] = sibling.keys[i];
+            MultiCounter.increaseCounter(2,2); // 2 assignments made.1 for ++i and one for the other.
+        }
 
         // children: children[idx+1] copy to children[idx]
-        if (!child.isLeaf){
-            for (int i = 0;i <= sibling.num; ++i)
+        if (MultiCounter.increaseCounter(2) && !child.isLeaf){
+            for (int i = 0;MultiCounter.increaseCounter(2) && i <= sibling.num; ++i) {
                 child.children[i+MinDeg] = sibling.children[i];
+                MultiCounter.increaseCounter(2,2); // 2 assignments made.1 for ++i and one for the other.
+            }
         }
 
         // Move keys forward, not gap caused by moving keys[idx] to children[idx]
-        for (int i = idx+1; i<num; ++i)
+        for (int i = idx+1; MultiCounter.increaseCounter(2) && i<num; ++i) {
             keys[i-1] = keys[i];
+            MultiCounter.increaseCounter(2,2); // 2 assignments made.1 for ++i and one for the other.
+        }
         // Move the corresponding child node forward
-        for (int i = idx+2;i<=num;++i)
+        for (int i = idx+2; MultiCounter.increaseCounter(2) && i<=num;++i) {
             children[i-1] = children[i];
+            MultiCounter.increaseCounter(2,2); // 2 assignments made.1 for ++i and one for the other.
+        }
 
         child.num += sibling.num + 1;
         num--;
+        MultiCounter.increaseCounter(2,2); // 2 assignments made.
     }
 
 
     public void insertNotFull(int key){
 
         int i = num -1; // Initialize i as the rightmost index
-
-        if (isLeaf){ // When it is a leaf node
+        MultiCounter.increaseCounter(2);// 1 assignment made.
+        
+        if (MultiCounter.increaseCounter(2) && isLeaf){ // When it is a leaf node
             // Find the location where the new key should be inserted
-            while (i >= 0 && keys[i] > key){
+            while ( (MultiCounter.increaseCounter(2) && i >= 0 ) && 
+            		(MultiCounter.increaseCounter(2) && keys[i] > key )){
                 keys[i+1] = keys[i]; // keys backward shift
                 i--;
+                MultiCounter.increaseCounter(2,2);// 2 assignments made.
             }
             keys[i+1] = key;
             num = num +1;
+            MultiCounter.increaseCounter(2,2);// 2 assignments made.
         }
         else{
             // Find the child node location that should be inserted
-            while (i >= 0 && keys[i] > key)
+            while ( (MultiCounter.increaseCounter(2) && i >= 0 ) && 
+            		(MultiCounter.increaseCounter(2) && keys[i] > key ) ) {
                 i--;
-            if (children[i+1].num == 2*MinDeg - 1){ // When the child node is full
+                MultiCounter.increaseCounter(2);// 1 assignment made
+            }
+            if (MultiCounter.increaseCounter(2) && children[i+1].num == 2*MinDeg - 1){ // When the child node is full
                 splitChild(i+1,children[i+1]);
                 // After splitting, the key in the middle of the child node moves up, and the child node splits into two
-                if (keys[i+1] < key)
+                if (MultiCounter.increaseCounter(2) && keys[i+1] < key) {
                     i++;
+                    MultiCounter.increaseCounter(2);// 1 assignment made
+                }
             }
             children[i+1].insertNotFull(key);
         }
@@ -269,27 +326,39 @@ public class BTreeNode {
         // First, create a node to hold the keys of MinDeg-1 of y
         BTreeNode z = new BTreeNode(y.MinDeg,y.isLeaf);
         z.num = MinDeg - 1;
-
+        
+        MultiCounter.increaseCounter(2,2); // 2 assignments made.
         // Pass the properties of y to z
-        for (int j = 0; j < MinDeg-1; j++)
+        MultiCounter.increaseCounter(2); // 1 assignment for int j = 0
+        for (int j = 0; MultiCounter.increaseCounter(2) && j < MinDeg-1; j++) {
             z.keys[j] = y.keys[j+MinDeg];
-        if (!y.isLeaf){
-            for (int j = 0; j < MinDeg; j++)
+            MultiCounter.increaseCounter(2,2); // 1 assignment for j++ and 1 for the other.
+        }
+        if (MultiCounter.increaseCounter(2) && !y.isLeaf){
+            for (int j = 0; MultiCounter.increaseCounter(2) &&  j < MinDeg; j++) {
                 z.children[j] = y.children[j+MinDeg];
+                MultiCounter.increaseCounter(2,2); // 1 assignment for j++ and 1 for the other.
+            }
         }
         y.num = MinDeg-1;
-
+        MultiCounter.increaseCounter(2);// 1 assignment.
         // Insert a new child into the child
-        for (int j = num; j >= i+1; j--)
+        for (int j = num; MultiCounter.increaseCounter(2) && j >= i+1; j--) {
             children[j+1] = children[j];
+            MultiCounter.increaseCounter(2,2); // 1 assignment for j++ and 1 for the other.
+        }
         children[i+1] = z;
-
+        MultiCounter.increaseCounter(2); // 1 assignment.
+        
         // Move a key in y to this node
-        for (int j = num-1;j >= i;j--)
+        for (int j = num-1; MultiCounter.increaseCounter(2) && j >= i;j--) {
             keys[j+1] = keys[j];
+            MultiCounter.increaseCounter(2,2); // 1 assignment for j++ and 1 for the other.
+        }
         keys[i] = y.keys[MinDeg-1];
 
         num = num + 1;
+        MultiCounter.increaseCounter(2,2); // 2 assignments.
     }
 
 
