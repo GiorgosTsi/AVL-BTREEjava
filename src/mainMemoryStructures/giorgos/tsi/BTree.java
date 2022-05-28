@@ -1,14 +1,22 @@
 package mainMemoryStructures.giorgos.tsi;
 
+import org.tuc.counter.MultiCounter;
+
+/**
+ * BTree implementation 
+ * made by https://programmer.group/b-tree-java-implementation.html?fbclid=IwAR2qT5gYVtYSe8xrsJf0wi3Jvz0-yjprAnNSJgPwMWAxdi9TYsjFM3ZL_ak 
+ * Some comments have been added by me.
+ *  */
+
 public class BTree {
 
 	BTreeNode root;
     int MinDeg;
 
     // Constructor
-    public BTree(int deg){
+    public BTree(int MinDeg){
         this.root = null;
-        this.MinDeg = deg;
+        this.MinDeg = MinDeg; // min degree of the tree. Degree of tree is 2* MinDeg!
     }
 
     public void traverse(){
@@ -17,8 +25,16 @@ public class BTree {
         }
     }
 
-    // Function to find key
+    /**
+     * Method to find a key in the b tree.
+     * If the key to find exists on the tree,we return
+     * the node where it exists,else null.
+     * Total operations(comparisons + assignments) made while searching stored in MultiCounter[0].
+     * @param key to search
+     * @return node that contains the key.
+     *  */
     public BTreeNode search(int key){
+    	MultiCounter.increaseCounter(1,2);// one comparison,one assignment made.
         return root == null ? null : root.search(key);//start searching from root until leaf.
     }
 

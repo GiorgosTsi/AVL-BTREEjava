@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.tuc.counter.MultiCounter;
 
 import mainMemoryStructures.giorgos.tsi.AVLTree;
+import mainMemoryStructures.giorgos.tsi.BTree;
 
 /**
  * @author giorgos tsi
@@ -51,7 +52,11 @@ public class Tester {
 		
 		/*******************  AVL TESTS ********************/
 		System.out.println("*".repeat(40) +"TESTS FOR AVL TREE" + "*".repeat(40));
-		this.doAVLTreeTest();
+		//this.doAVLTreeTest();
+		
+		/*******************  BTree TESTS ********************/
+		System.out.println("*".repeat(40) +"TESTS FOR B TREE" + "*".repeat(40));
+		this.doBTreeTest(4);// 4 is the degree of the tree.
 		
 		
 	}
@@ -60,6 +65,10 @@ public class Tester {
 	 * private method to do the avl tree measurements.
 	 *  */
 	private void doAVLTreeTest() {
+		
+		/* reset the counters: */
+		MultiCounter.resetCounter(1);
+		MultiCounter.resetCounter(2);
 		
 		AVLTree avlTree = new AVLTree();
 		double totalOperationsDone =0.0;
@@ -71,7 +80,7 @@ public class Tester {
 			
 			MultiCounter.resetCounter(2);//reset the counter.
 			
-			/*Insert as many elements as the array of number of elements indicates */
+			/*Insert as many elements as the array NUMBER_OF_ELEMENTS_PER_TEST indicates */
 			for(int i=0; i<NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest] ; i++)
 				avlTree.insert(this.totalElementsToInsert[i]);
 			
@@ -119,6 +128,53 @@ public class Tester {
 			
 			//end of this number of elements test,make a new empty structure for the next test:
 			avlTree = new AVLTree();
+		}
+	}
+	
+	
+	/**
+	 * Method to do the b tree measurements.
+	 * @param the degree of the b tree. 
+	 *  */
+	public void doBTreeTest(int degree) {
+		
+		/* reset the counters: */
+		MultiCounter.resetCounter(1);
+		MultiCounter.resetCounter(2);
+		
+		BTree bTree = new BTree(degree/2);// constructor takes min degree as parameter.
+		double totalOperationsDone =0.0;
+		for(int numberOfTest=0; numberOfTest < NUMBER_OF_ELEMENTS_PER_TEST.length ; numberOfTest++) {
+			
+			int numberOfElements =NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest];
+			System.out.println("\t**BTree test for " + numberOfElements + " elements in the structure:\n");
+			
+			MultiCounter.resetCounter(2);//reset the counter.
+			
+			/*Insert as many elements as the array NUMBER_OF_ELEMENTS_PER_TEST indicates */
+			for(int i=0; i<NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest] ; i++)
+				bTree.insert(this.totalElementsToInsert[i]);
+			
+			/*** Start tests ***/
+			
+			
+			
+			/********** 3) Search 100 elements: **********/
+			
+			totalOperationsDone = 0.0;//reset the variable,so we test the search method.
+			
+			//search 100 elements:
+			for(int i=0; i < 100 ; i++) {
+				
+				MultiCounter.resetCounter(1);//reset the counter.
+				bTree.search(this.elementsToSearch[i]);
+				totalOperationsDone += MultiCounter.getCount(1);//operations for searching a key,stored in counter 1.
+				
+			}
+			System.out.println("\t\t Mean operations for searching 100 elements in b tree with " + numberOfElements + " elements: " + totalOperationsDone/100);
+			
+			//end of this number of elements test,make a new empty structure for the next test:
+			bTree = new BTree(degree/2);
 		}
 	}
 }

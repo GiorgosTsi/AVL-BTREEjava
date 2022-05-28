@@ -1,15 +1,18 @@
 package mainMemoryStructures.giorgos.tsi;
 
+import org.tuc.counter.MultiCounter;
+
 /**
  * BTree Node implementation 
  * made by https://programmer.group/b-tree-java-implementation.html?fbclid=IwAR2qT5gYVtYSe8xrsJf0wi3Jvz0-yjprAnNSJgPwMWAxdi9TYsjFM3ZL_ak 
+ * Some comments have been added by me, and also fixed some bugs on search methods!
  *  */
 public class BTreeNode {
 
 	int[] keys; // keys of nodes
-    int MinDeg; // Minimum degree of B-tree node
-    BTreeNode[] children; // Child node
-    int num; // Number of keys of node
+    int MinDeg; // Minimum degree of B-tree node.Degree of the b tree is 2*MinDeg!
+    BTreeNode[] children; // Children pointers.
+    int num; // #keys stored in the node
     boolean isLeaf; // True when leaf node
 
     // Constructor
@@ -18,11 +21,17 @@ public class BTreeNode {
         this.MinDeg = deg;
         this.isLeaf = isLeaf;
         this.keys = new int[2*this.MinDeg-1]; // Node has 2*MinDeg-1 keys at most
-        this.children = new BTreeNode[2*this.MinDeg];
+        this.children = new BTreeNode[2*this.MinDeg];//node has 2*MinDeg children pointers.
         this.num = 0;
     }
 
-    // Find the first location index equal to or greater than key
+    /** Find the first location index equal to or greater than key.
+     * This method is used in remove or insert btree node methods.
+     * We want to know where is the next greater key so we can traverse the tree
+     * if the key we search does not exist in the current node.
+     * @param key to search
+     * @return the index of the key(or the 1st greater key) or num if the key does not exist.
+     */
     public int findKey(int key){
 
         int idx = 0;
@@ -36,20 +45,20 @@ public class BTreeNode {
 
     public void remove(int key){
 
-        int idx = findKey(key);
-        if (idx < num && keys[idx] == key){ // Find key
-            if (isLeaf) // key in leaf node
+        int idx = findKey(key);//find the index of the key or the 1st greater key. 
+        if (idx < num && keys[idx] == key){ // key found on the current node.
+            if (isLeaf) // key in leaf node!
                 removeFromLeaf(idx);
             else // key is not in the leaf node
                 removeFromNonLeaf(idx);
         }
-        else{
-            if (isLeaf){ // If the node is a leaf node, then the node is not in the B tree
+        else{//key does not exist in the current node.Either exists in the idx's child or does not exist.
+            if (isLeaf){ // If the node is a leaf node, then the key does not exist in the B tree
                 System.out.printf("The key %d is does not exist in the tree\n",key);
                 return;
             }
 
-            // Otherwise, the key to be deleted exists in the subtree with the node as the root
+            // Otherwise, the key to be deleted exists in the subtree with the node as the root!
 
             // This flag indicates whether the key exists in the subtree whose root is the last child of the node
             // When idx is equal to num, the whole node is compared, and flag is true
@@ -300,14 +309,24 @@ public class BTreeNode {
 
     public BTreeNode search(int key){
         int i = 0;
-        while (i < num && key > keys[i])
+        MultiCounter.increaseCounter(1); // one assignment made.
+        while ( (MultiCounter.increaseCounter(1) && i < num ) && 
+        		(MultiCounter.increaseCounter(1) && key > keys[i] ) ) {
             i++;
-
-        if (keys[i] == key)
-            return this;
-        if (isLeaf)
-            return null;
-        return children[i].search(key);
+            MultiCounter.increaseCounter(1);//one assignment made: i = i + 1
+        }
+        
+        // index i now contains the index of key we search,or the index of the 1st greater key.
+        // So if keys[i] contains the key,we found it,else we traverse the subtree from i's left child.
+        if(MultiCounter.increaseCounter(1) && i < num && 
+        		MultiCounter.increaseCounter(1) && keys[i] == key) // key found.We need the i<num check,so we have no index out of bounds exception!
+        	return this;
+        // key does not exist in the current node.Search i's left subtree.
+        else if( MultiCounter.increaseCounter(1) && !isLeaf) // if i == num and this is not a leaf node search the rightmost child of this node.
+        	return children[i].search(key);
+        //to be here node to search is a leaf && ( i=num || keys[i] != key ), so the key does not exist.
+        else 
+        	return null;
     }
 }
 
