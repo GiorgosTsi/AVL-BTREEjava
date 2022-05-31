@@ -55,8 +55,11 @@ public class Tester {
 		//this.doAVLTreeTest();
 		
 		/*******************  BTree TESTS ********************/
-		System.out.println("*".repeat(40) +"TESTS FOR B TREE" + "*".repeat(40));
+		System.out.println("*".repeat(40) +"TESTS FOR B TREE (DEGREE = 4)" + "*".repeat(40));
 		this.doBTreeTest(4);// 4 is the degree of the tree.
+		
+		System.out.println("*".repeat(40) +"TESTS FOR B TREE (DEGREE = 64)" + "*".repeat(40));
+		this.doBTreeTest(64);// 64 is the degree of the tree.
 		
 		
 	}
@@ -76,7 +79,7 @@ public class Tester {
 			
 			//System.out.println("root: " + avlTree.getRoot());
 			int numberOfElements =NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest];
-			System.out.println("\t**AVLTree test for " + numberOfElements + " elements in the structure:\n");
+			System.out.println("\n\t**AVLTree test for " + numberOfElements + " elements in the structure:");
 			
 			MultiCounter.resetCounter(2);//reset the counter.
 			
@@ -147,7 +150,7 @@ public class Tester {
 		for(int numberOfTest=0; numberOfTest < NUMBER_OF_ELEMENTS_PER_TEST.length ; numberOfTest++) {
 			
 			int numberOfElements =NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest];
-			System.out.println("\t**BTree test for " + numberOfElements + " elements in the structure:\n");
+			System.out.println("\n\t**BTree test for " + numberOfElements + " elements in the structure:");
 			
 			MultiCounter.resetCounter(2);//reset the counter.
 			
