@@ -8,6 +8,8 @@ import java.util.InvalidPropertiesFormatException;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
+import org.tuc.counter.MultiCounter;
+
 import ds.bplus.util.InvalidBTreeStateException;
 
 @SuppressWarnings("WeakerAccess")
@@ -104,7 +106,7 @@ public class BPlusTree {
     /**
      * Insert the key into the tree while also providing the flexibility
      * of having unique keys or not at will.
-     *
+     * Total disk accesses made , stored in MultiCounter[1]
      * @param key key to add
      * @param value value of the key
      * @param unique allow duplicates for this run?
@@ -1968,6 +1970,7 @@ public class BPlusTree {
             {return(null);}
         treeFile.seek(index);
         // get the page type
+        MultiCounter.increaseCounter(2);//one disk access made.
         TreeNodeType nt = getPageType(treeFile.readShort());
 
         // handle internal node reading
@@ -1989,6 +1992,7 @@ public class BPlusTree {
         }
         // check if we have an overflow page
         else if(isOverflowPage(nt)) {
+        	MultiCounter.increaseCounter(2);//one disk access made.
             long nextptr = treeFile.readLong();
             long prevptr = treeFile.readLong();
             int curCap = treeFile.readInt();

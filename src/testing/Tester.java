@@ -4,6 +4,10 @@ import java.io.IOException;
 
 import org.tuc.counter.MultiCounter;
 
+import ds.bplus.bptree.BPlusConfiguration;
+import ds.bplus.bptree.BPlusTree;
+import ds.bplus.bptree.BPlusTreePerformanceCounter;
+import ds.bplus.util.InvalidBTreeStateException;
 import mainMemoryStructures.giorgos.tsi.AVLTree;
 import mainMemoryStructures.giorgos.tsi.BTree;
 
@@ -48,11 +52,11 @@ public class Tester {
 	}
 	
 	
-	public void doTest() {
+	public void doTest() throws IOException, InvalidBTreeStateException {
 		
 		/*******************  AVL TESTS ********************/
 		System.out.println("*".repeat(40) +"TESTS FOR AVL TREE" + "*".repeat(40));
-		//this.doAVLTreeTest();
+		this.doAVLTreeTest();
 		
 		/*******************  BTree TESTS ********************/
 		System.out.println("*".repeat(40) +"TESTS FOR B TREE (DEGREE = 4)" + "*".repeat(40));
@@ -61,7 +65,12 @@ public class Tester {
 		System.out.println("*".repeat(40) +"TESTS FOR B TREE (DEGREE = 64)" + "*".repeat(40));
 		this.doBTreeTest(64);// 64 is the degree of the tree.
 		
+		/*******************  BPTree TESTS ********************/
+		System.out.println("*".repeat(40) +"TESTS FOR BP TREE WITH PAGE SIZE 128" + "*".repeat(40));
+		this.doBPlusTreeTest(128);
 		
+		System.out.println("*".repeat(40) +"TESTS FOR BP TREE WITH PAGE SIZE 256" + "*".repeat(40));
+		this.doBPlusTreeTest(256);
 	}
 	
 	/**
@@ -139,7 +148,7 @@ public class Tester {
 	 * Method to do the b tree measurements.
 	 * @param the degree of the b tree. 
 	 *  */
-	public void doBTreeTest(int degree) {
+	private void doBTreeTest(int degree) {
 		
 		/* reset the counters: */
 		MultiCounter.resetCounter(1);
@@ -206,4 +215,72 @@ public class Tester {
 			bTree = new BTree(degree/2);
 		}
 	}
+	
+	private void doBPlusTreeTest(int dataPageSize) throws IOException, InvalidBTreeStateException {
+		
+		BPlusConfiguration conf = new BPlusConfiguration(dataPageSize, 8, 4);// key=8 bytes, info = 4 bytes.
+		BPlusTreePerformanceCounter counter = new BPlusTreePerformanceCounter(true);
+		BPlusTree bp = new BPlusTree(conf, counter) ;
+		
+		double totalDiskAccessesDone =0.0;
+		for(int numberOfTest=0; numberOfTest < NUMBER_OF_ELEMENTS_PER_TEST.length  ; numberOfTest++) {
+			
+			int numberOfElements =NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest];
+			System.out.println("\n\t**BPTree test for " + numberOfElements + " elements in the structure:");
+			
+			/*Insert as many elements as the array NUMBER_OF_ELEMENTS_PER_TEST indicates */
+			for(int i=0; i<NUMBER_OF_ELEMENTS_PER_TEST[numberOfTest] ; i++)
+				bp.insertKey(this.totalElementsToInsert[i],"",true);
+			
+			/*** Start tests ***/
+			
+			/********** 1) Insert 100 extra elements: **********/
+			
+			//insert 100 extra elements:
+			for(int i=0; i < 100 ; i++) {
+				
+				counter.resetAllMetrics();
+				//MultiCounter.resetCounter(2);//reset the counter.
+				bp.insertKey(this.oneHundredElementsToInsert[i],"",true);
+				totalDiskAccessesDone += counter.getPageReads() + counter.getPageWrites();
+				
+			}
+			System.out.println("\t\t Mean number of disk accesses for inserting 100 elements in b plus tree with " + numberOfElements + " elements: " + totalDiskAccessesDone/100);
+			
+			/********** 2) Delete 100 elements: **********/
+			
+			totalDiskAccessesDone = 0.0;//reset the variable,so we test the deletions.
+			
+			//delete 100 elements:
+			for(int i=0; i < 100 ; i++) {
+			
+				counter.resetAllMetrics();
+				bp.deleteKey(this.elementsToDelete[i],true);
+				totalDiskAccessesDone += counter.getPageReads() + counter.getPageWrites();
+				
+			}
+			System.out.println("\t\t Mean number of disk accesses for deleting 100 elements in b plus tree with " + numberOfElements + " elements: " + totalDiskAccessesDone/100);
+			
+			
+			
+			/********** 3) Search 100 elements: **********/
+			
+			totalDiskAccessesDone = 0.0;//reset the variable,so we test the search method.
+			
+			//search 100 elements:
+			for(int i=0; i < 100 ; i++) {
+				
+				counter.resetAllMetrics();
+				bp.searchKey(this.elementsToSearch[i],true);
+				totalDiskAccessesDone += counter.getPageReads() + counter.getPageWrites();
+				
+			}
+			System.out.println("\t\t Mean number of disk accesses for searching 100 elements in b plus tree with " + numberOfElements + " elements: " + totalDiskAccessesDone/100);
+			
+			//end of this number of elements test,make a new empty structure for the next test:
+			bp = new BPlusTree(conf, counter); 
+		}
+		
+	}
+	
 }
